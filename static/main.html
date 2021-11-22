@@ -1,0 +1,163 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="./js/jquery-3.4.1.min.js"></script>
+    <script src="./js/angular.1-8-2.min.js"></script>
+    <script src="./js/bootstrap.3-4-1.min.js"></script>
+    <script src="./js/bootstrap-select.1-13-14.min.js"></script>
+    <!-- 引入 Bootstrap -->
+    <link href="./css/bootstrap.3-4-1.min.css" rel="stylesheet">
+    <link href="./css/bootstrap-theme.3-4-1.css" rel="stylesheet">
+    <link href="./css/bootstrap-select.1-13-14.min.css" rel="stylesheet">
+    <style>
+        [ng-cloak]{display:none !important}
+        .top-buffer50 { margin-top:50px; }
+        .top-buffer30 { margin-top:30px; }
+
+
+
+    </style>
+    <script src="main.js"></script>
+</head>
+<body>
+
+<div ng-app="myApp" ng-controller="myCtrl">
+    <div class="alert alert-danger alert-dismissible" role="alert" ng-show="vm.error_show" ng-cloak>
+        <button type="button" class="close" onclick="$('.alert').hide();vm.error_show = false;" aria-label="Close">
+            <span aria-hidden="true">&times;</span></button>
+        <strong>错误! </strong>{{vm.errorMessage}}
+    </div>
+    <div class="container" id="container">
+        <div class="row top-buffer50">
+            <div class="col-md-8">
+                <h1>小学算数题工具<span class="label label-primary">New</span></h1>
+            </div>
+        </div>
+        <div class="row top-buffer50">
+            <div class="col-md-8">
+                <form role="form">
+                    <div class="form-group">
+                        <label for="model">题目模版:</label>
+                        <select id="model" class="selectpicker bla bla bli" data-live-search="true" title="未选择题目"
+                                multiple
+                                data-live-search-placeholder="请选择题目">
+                        </select>
+                    </div>
+                    <div class="form-group" ng-show="vm.formula_show" ng-cloak>
+                        <label for="name" class="top-buffer30">算式:{{vm.formulas[0]}}</label>
+                        <input type="text" ng-model="vm.formulas[0]" class="form-control" placeholder="10 + 10 = 10">
+                        <blockquote>
+                            <large>用法</large>
+                            <ul>
+                                <li>加法:+
+                                <li>减法:-</li>
+                                <li>乘法:*</li>
+                                <li>除法:/</li>
+                                <li>加法或减法:+-</li>
+                                <li>乘法或除法:*/</li>
+                                <li>数字范围用,间隔，默认最小是1，例如10代表1到10， 2,10代表从2到10</li>
+                                <li>算式结尾必须有=，结果也必须也规定一个数字，如果不限制，可以写大点，例如=10000</li>
+                                <li>例1: 表内乘法 2,9 * 2,9 = 81</li>
+                                <li>例2: 2,9 * 2,9 + 20 = 100</li>
+                                <li>例3: 四则运算 2,9 * (20 - 2,9) + 2,10 = 100</li>
+                            </ul>
+                        </blockquote>
+                    </div>
+                    <div ng-repeat="x in vm.formulas" ng-cloak>
+                        <div class="form-group" class="top-buffer30">
+                            <label for="name"> 题目数量--{{vm.loaded_formula[x]}}</label>
+                            <input type="text" ng-model="vm.formulaNumbers[$index]" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group top-buffer30">
+                        <button type="button" ng-click="vm.submit()" class="btn btn-primary">生成</button>
+                        <button type="button" ng-click="vm.download()" ng-disabled="vm.not_allow_download"
+                                class="btn btn-primary">下载
+                        </button>
+                    </div>
+                </form>
+                <table class="table table-bordered" ng-show="vm.preview" ng-cloak>
+                    <caption>预览结果: 共计生成{{vm.result.length * 5}}道</caption>
+                    <tr ng-repeat="x in vm.result">
+                        <td>{{x[0]}}</td>
+                        <td>{{x[1]}}</td>
+                        <td>{{x[2]}}</td>
+                        <td>{{x[3]}}</td>
+                        <td>{{x[4]}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="row top-buffer50">
+            <div class="col-md-8">
+                <img src="/wp-content/uploads/2014/06/download.png" class="img-rounded center-block">
+            </div>
+        </div>
+        <div class="row top-buffer50">
+            <div class="col-md-8">
+                <address>
+                    <strong>联系我：</strong>
+                    <a href="mailto:#">xing.1.liu@nokia-sbell.com</a>
+                </address>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+<script>
+    $(function () {
+        $('#model').selectpicker();
+        loadModelData();
+    });
+
+    $('#model').on('changed.bs.select',function(e, clickedIndex, isSelected, previousValue){
+        var scope = angular.element(document.getElementById('container')).scope();
+		scope.vm.formulas = $('#model').val();
+		scope.vm.preview = false;
+		if($('#model').val()[0] == ''){
+		    scope.vm.formula_show = true;
+		}else {
+		    scope.vm.formula_show = false;
+		}
+		scope.$apply();
+    });
+    function loadModelData(){
+           $.ajax({
+                url : "/model",
+                type : 'GET',
+                async : false,
+                datatype : 'json',
+                success : function(data) {
+                    if(data){
+                        var models =[];
+                        var scope = angular.element(document.getElementById('container')).scope();
+                        for(var i=0,len=data.length;i<len;i++){
+
+　　　　　　　　　　　　　　models.push('<option value="'+ data[i].model+'">'+data[i].name+'</option>')
+                            scope.vm.loaded_formula[data[i].model] = data[i].name
+                       }
+                       scope.$apply();
+                        $("#model").html(models.join(' '));
+                        $("#model").selectpicker('refresh');
+                    }
+                },
+                error : function() {
+                    alert('查询出错');
+                }
+            });
+        }
+
+
+
+
+
+
+
+
+
+
+</script>
+</html>

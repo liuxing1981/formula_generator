@@ -1,5 +1,5 @@
 import json
-
+import os
 from flask import Flask, jsonify, request, Response, url_for
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, colors
@@ -10,7 +10,9 @@ from werkzeug.utils import redirect
 from calculate import calculate
 
 app = Flask(__name__)
-with open ('models.json',encoding='utf-8') as f:
+
+exec_path = os.path.split(os.path.realpath(__file__))[0]
+with open (os.path.join(exec_path, 'models.json'),encoding='utf-8') as f:
     models = json.load(f)
 
 @app.route('/')
@@ -92,4 +94,4 @@ def downloadFormula():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=80, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)

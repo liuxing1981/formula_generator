@@ -33,6 +33,8 @@ def getStartAndEndValue(s):
     return start_end_values
 
 def add_bracket(s, start_end_values, pos):
+    if not s:
+        return ''
     m = formula_pattern.match(s)
     if m:
         first, operator, second = m.group(1), m.group(2),m.group(3)
@@ -146,6 +148,8 @@ class calculate:
                 j = random.randint(limit_j[0], limit_j[1])
                 if self.result_limit and i + j >= self.result_limit[0] and i + j <= self.result_limit[1]:
                     new_formula =  '%s + %s' % (i, j)
+                else:
+                    continue
             else:
                 new_formula =  '%s + %s' % (i, parse_result2)
             new_formula = add_bracket(new_formula, parse_result1, 1)
@@ -162,6 +166,8 @@ class calculate:
                 j = random.randint(limit_j[0], limit_j[1])
                 if self.result_limit and i * j >= self.result_limit[0] and i * j <= self.result_limit[1]:
                     new_formula =  '%s * %s' % (i, j)
+                else:
+                    continue
             else:
                 new_formula = '%s * %s' % (i, parse_result2)
             new_formula = add_bracket(new_formula, parse_result1, 1)
@@ -224,9 +230,25 @@ class calculate:
 
 if __name__ == '__main__':
     cal = calculate( '2,81 / 1,9 = 1,9', 10)
+    cal.do_task()
+    cal.print_result()
+
     cal = calculate( '(100 + 100) / 2 + 9 = 10000', 10)
+    cal.do_task()
+    cal.print_result()
+
     cal = calculate( '(10 + 100) / (2 + 9) = 10000', 10)
-    # cal = calculate('(1,5 + 1,5) * (7,9 + 2,7) / (3 + 2) = 10000', 100)
-    # cal = calculate('3,9 / 3,9 = 100', 10)
+    cal.do_task()
+    cal.print_result()
+
+    cal = calculate('(1,5 + 1,5) * (7,9 + 2,7) / (3 + 2) = 10000', 100)
+    cal.do_task()
+    cal.print_result()
+
+    cal = calculate('3,9 / 3,9 = 100', 10)
+    cal.do_task()
+    cal.print_result()
+
+    cal = calculate('10 + 10 = 10', 10)
     cal.do_task()
     cal.print_result()
